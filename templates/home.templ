@@ -1,6 +1,9 @@
 package templates
 
-import "html/template"
+import (
+	"fmt"
+	"html/template"
+)
 
 templ Home(viteTags template.HTML) {
 	@Layout("Home - PocketBase + Templ", viteTags) {
@@ -8,5 +11,30 @@ templ Home(viteTags template.HTML) {
 			<h1>Welcome</h1>
 			<p>PocketBase + Templ による SSR アプリケーションです。</p>
 		</article>
+		<article>
+			<h2>htmx サンプル</h2>
+			<button hx-get="/greeting" hx-target="#greeting" hx-swap="innerHTML">
+				挨拶を取得
+			</button>
+			<div id="greeting" style="margin-top: 1rem;"></div>
+		</article>
+		<article>
+			<h2>カウンター</h2>
+			<div id="counter">
+				@Counter(0)
+			</div>
+		</article>
 	}
+}
+
+templ Counter(count int) {
+	<p>カウント: <strong>{ fmt.Sprintf("%d", count) }</strong></p>
+	<div role="group">
+		<button hx-post="/counter/increment" hx-target="#counter" hx-swap="innerHTML">+1</button>
+		<button hx-post="/counter/decrement" hx-target="#counter" hx-swap="innerHTML">-1</button>
+	</div>
+}
+
+templ Greeting(message string) {
+	<p>{ message }</p>
 }

@@ -39,10 +39,11 @@ func getViteTags() (template.HTML, error) {
 	}
 
 	fragment, err := vite.HTMLFragment(vite.Config{
-		FS:        fsys,
-		IsDev:     isDev,
-		ViteURL:   "http://localhost:5173",
-		ViteEntry: viteEntry,
+		FS:           fsys,
+		IsDev:        isDev,
+		ViteURL:      "http://localhost:5173",
+		ViteEntry:    viteEntry,
+		ViteTemplate: vite.Vanilla,
 	})
 	if err != nil {
 		return "", err
@@ -71,6 +72,11 @@ func main() {
 		// SSR routes
 		se.Router.GET("/", h.HomeHandler)
 		se.Router.GET("/about", h.AboutHandler)
+
+		// htmx routes
+		se.Router.GET("/greeting", h.GreetingHandler)
+		se.Router.POST("/counter/increment", h.CounterIncrementHandler)
+		se.Router.POST("/counter/decrement", h.CounterDecrementHandler)
 
 		return se.Next()
 	})
