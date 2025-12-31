@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"bytes"
 	"html/template"
+	"net/http"
 	"os"
 
 	"github.com/kimihito-sandbox/pbgoframework/templates"
@@ -41,7 +43,13 @@ func HomeHandler(e *core.RequestEvent) error {
 	if err != nil {
 		return err
 	}
-	return templates.Home(viteTags).Render(e.Request.Context(), e.Response)
+
+	var buf bytes.Buffer
+	if err := templates.Home(viteTags).Render(e.Request.Context(), &buf); err != nil {
+		return err
+	}
+
+	return e.HTML(http.StatusOK, buf.String())
 }
 
 func AboutHandler(e *core.RequestEvent) error {
@@ -49,5 +57,11 @@ func AboutHandler(e *core.RequestEvent) error {
 	if err != nil {
 		return err
 	}
-	return templates.About(viteTags).Render(e.Request.Context(), e.Response)
+
+	var buf bytes.Buffer
+	if err := templates.About(viteTags).Render(e.Request.Context(), &buf); err != nil {
+		return err
+	}
+
+	return e.HTML(http.StatusOK, buf.String())
 }
