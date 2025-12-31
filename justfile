@@ -2,7 +2,11 @@
 
 # Run both Vite and Go servers in parallel
 dev:
-    just --justfile {{justfile()}} vite & just --justfile {{justfile()}} server
+    #!/usr/bin/env bash
+    trap 'kill 0' EXIT
+    (cd frontend && pnpm dev) &
+    go tool air &
+    wait
 
 # Run Vite dev server
 vite:
