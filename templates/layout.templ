@@ -1,6 +1,8 @@
 package templates
 
-templ Layout(title string) {
+import "html/template"
+
+templ Layout(title string, viteTags template.HTML) {
 	<!DOCTYPE html>
 	<html lang="ja">
 		<head>
@@ -8,6 +10,7 @@ templ Layout(title string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ title }</title>
 			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"/>
+			@templ.Raw(string(viteTags))
 		</head>
 		<body>
 			<nav class="container">

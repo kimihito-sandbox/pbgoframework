@@ -1,7 +1,9 @@
 package templates
 
-templ Home() {
-	@Layout("Home - PocketBase + Templ") {
+import "html/template"
+
+templ Home(viteTags template.HTML) {
+	@Layout("Home - PocketBase + Templ", viteTags) {
 		<article>
 			<h1>Welcome</h1>
 			<p>PocketBase + Templ による SSR アプリケーションです。</p>

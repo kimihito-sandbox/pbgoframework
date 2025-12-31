@@ -1,13 +1,17 @@
 package templates
 
-templ About() {
-	@Layout("About - PocketBase + Templ") {
+import "html/template"
+
+templ About(viteTags template.HTML) {
+	@Layout("About - PocketBase + Templ", viteTags) {
 		<article>
 			<h1>About</h1>
 			<p>このアプリは以下の技術で構築されています：</p>
 			<ul>
 				<li>PocketBase - Go製のバックエンドフレームワーク</li>
 				<li>Templ - Go用の型安全なテンプレートエンジン</li>
+				<li>Vite - 高速なフロントエンドビルドツール</li>
+				<li>htmx - HTMLでAJAXを実現</li>
 				<li>Pico CSS - ミニマルなCSSフレームワーク</li>
 			</ul>
 		</article>
