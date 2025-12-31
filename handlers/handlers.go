@@ -3,6 +3,7 @@ package handlers
 import (
 	"html/template"
 
+	"github.com/a-h/templ"
 	"github.com/kimihito-sandbox/pbgoframework/templates"
 	"github.com/pocketbase/pocketbase/core"
 )
@@ -25,39 +26,44 @@ func (h *Handlers) html(e *core.RequestEvent) {
 	e.Response.Header().Set("Content-Type", "text/html; charset=utf-8")
 }
 
-func (h *Handlers) HomeHandler(e *core.RequestEvent) error {
+// renderPage renders a full page with Vite tags
+func (h *Handlers) renderPage(e *core.RequestEvent, page func(template.HTML) templ.Component) error {
 	viteTags, err := h.getViteTags()
 	if err != nil {
 		return err
 	}
 	h.html(e)
-	return templates.Home(viteTags).Render(e.Request.Context(), e.Response)
+	return page(viteTags).Render(e.Request.Context(), e.Response)
+}
+
+// renderFragment renders an HTML fragment (for htmx)
+func (h *Handlers) renderFragment(e *core.RequestEvent, component templ.Component) error {
+	h.html(e)
+	return component.Render(e.Request.Context(), e.Response)
+}
+
+// Page handlers
+
+func (h *Handlers) HomeHandler(e *core.RequestEvent) error {
+	return h.renderPage(e, templates.Home)
 }
 
 func (h *Handlers) AboutHandler(e *core.RequestEvent) error {
-	viteTags, err := h.getViteTags()
-	if err != nil {
-		return err
-	}
-	h.html(e)
-	return templates.About(viteTags).Render(e.Request.Context(), e.Response)
+	return h.renderPage(e, templates.About)
 }
 
 // htmx handlers
 
 func (h *Handlers) GreetingHandler(e *core.RequestEvent) error {
-	h.html(e)
-	return templates.Greeting("こんにちは！サーバーからの挨拶です 👋").Render(e.Request.Context(), e.Response)
+	return h.renderFragment(e, templates.Greeting("こんにちは！サーバーからの挨拶です 👋"))
 }
 
 func (h *Handlers) CounterIncrementHandler(e *core.RequestEvent) error {
 	h.counter++
-	h.html(e)
-	return templates.Counter(h.counter).Render(e.Request.Context(), e.Response)
+	return h.renderFragment(e, templates.Counter(h.counter))
 }
 
 func (h *Handlers) CounterDecrementHandler(e *core.RequestEvent) error {
 	h.counter--
-	h.html(e)
-	return templates.Counter(h.counter).Render(e.Request.Context(), e.Response)
+	return h.renderFragment(e, templates.Counter(h.counter))
 }
