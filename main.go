@@ -2,11 +2,14 @@ package main
 
 import (
 	"embed"
+	"html/template"
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/kimihito-sandbox/pbgoframework/handlers"
+	"github.com/olivere/vite"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
 )
@@ -14,21 +17,47 @@ import (
 //go:embed all:frontend/dist
 var distFS embed.FS
 
+var (
+	isDev     = os.Getenv("DEV") == "1"
+	viteEntry = "src/main.js"
+)
+
+func getDistFS() fs.FS {
+	fsys, err := fs.Sub(distFS, "frontend/dist")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return fsys
+}
+
+func getViteTags() (template.HTML, error) {
+	var fsys fs.FS
+	if isDev {
+		fsys = os.DirFS("frontend")
+	} else {
+		fsys = getDistFS()
+	}
+
+	fragment, err := vite.HTMLFragment(vite.Config{
+		FS:        fsys,
+		IsDev:     isDev,
+		ViteURL:   "http://localhost:5173",
+		ViteEntry: viteEntry,
+	})
+	if err != nil {
+		return "", err
+	}
+	return fragment.Tags, nil
+}
+
 func main() {
 	app := pocketbase.New()
 
-	// Set up embedded dist for production
-	if !handlers.IsDev() {
-		dist, err := fs.Sub(distFS, "frontend/dist")
-		if err != nil {
-			log.Fatal(err)
-		}
-		handlers.SetDistFS(dist)
-	}
+	h := handlers.New(getViteTags)
 
 	app.OnServe().BindFunc(func(se *core.ServeEvent) error {
-		// Serve static assets
-		if !handlers.IsDev() {
+		// Serve static assets in production
+		if !isDev {
 			assets, err := fs.Sub(distFS, "frontend/dist/assets")
 			if err != nil {
 				log.Fatal(err)
@@ -40,8 +69,8 @@ func main() {
 		}
 
 		// SSR routes
-		se.Router.GET("/", handlers.HomeHandler)
-		se.Router.GET("/about", handlers.AboutHandler)
+		se.Router.GET("/", h.HomeHandler)
+		se.Router.GET("/about", h.AboutHandler)
 
 		return se.Next()
 	})

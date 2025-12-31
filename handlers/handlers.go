@@ -3,57 +3,27 @@ package handlers
 import (
 	"bytes"
 	"html/template"
-	"io/fs"
 	"net/http"
-	"os"
 
 	"github.com/kimihito-sandbox/pbgoframework/templates"
-	"github.com/olivere/vite"
 	"github.com/pocketbase/pocketbase/core"
 )
 
-var (
-	isDev     bool
-	viteEntry = "src/main.js"
-	distFS    fs.FS // Set by main.go for production
-)
+// ViteTagsFunc is a function that returns Vite HTML tags
+type ViteTagsFunc func() (template.HTML, error)
 
-func init() {
-	isDev = os.Getenv("DEV") == "1"
+// New creates handlers with the given ViteTags function
+func New(getViteTags ViteTagsFunc) *Handlers {
+	return &Handlers{getViteTags: getViteTags}
 }
 
-// SetDistFS sets the embedded dist filesystem for production
-func SetDistFS(fsys fs.FS) {
-	distFS = fsys
+// Handlers holds the dependencies for HTTP handlers
+type Handlers struct {
+	getViteTags ViteTagsFunc
 }
 
-// IsDev returns whether the app is running in development mode
-func IsDev() bool {
-	return isDev
-}
-
-func getViteTags() (template.HTML, error) {
-	var fsys fs.FS
-	if isDev {
-		fsys = os.DirFS("frontend")
-	} else {
-		fsys = distFS
-	}
-
-	fragment, err := vite.HTMLFragment(vite.Config{
-		FS:        fsys,
-		IsDev:     isDev,
-		ViteURL:   "http://localhost:5173",
-		ViteEntry: viteEntry,
-	})
-	if err != nil {
-		return "", err
-	}
-	return fragment.Tags, nil
-}
-
-func HomeHandler(e *core.RequestEvent) error {
-	viteTags, err := getViteTags()
+func (h *Handlers) HomeHandler(e *core.RequestEvent) error {
+	viteTags, err := h.getViteTags()
 	if err != nil {
 		return err
 	}
@@ -66,8 +36,8 @@ func HomeHandler(e *core.RequestEvent) error {
 	return e.HTML(http.StatusOK, buf.String())
 }
 
-func AboutHandler(e *core.RequestEvent) error {
-	viteTags, err := getViteTags()
+func (h *Handlers) AboutHandler(e *core.RequestEvent) error {
+	viteTags, err := h.getViteTags()
 	if err != nil {
 		return err
 	}
