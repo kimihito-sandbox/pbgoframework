@@ -1,0 +1,13 @@
+# Build output
+tmp/
+pb_data/
+
+# Generated files
+*_templ.go
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
