@@ -10,6 +10,7 @@ tool (
 
 require (
 	github.com/a-h/templ v0.3.960
+	github.com/olivere/vite v0.1.0
 	github.com/pocketbase/pocketbase v0.35.0
 )
 

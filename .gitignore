@@ -1,9 +1,13 @@
 # Build output
 tmp/
 pb_data/
+frontend/dist/
 
 # Generated files
 *_templ.go
+
+# Node
+node_modules/
 
 # IDE
 .idea/
