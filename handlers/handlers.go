@@ -3,6 +3,7 @@ package handlers
 import (
 	"bytes"
 	"html/template"
+	"io/fs"
 	"net/http"
 	"os"
 
@@ -14,20 +15,33 @@ import (
 var (
 	isDev     bool
 	viteEntry = "src/main.js"
+	distFS    fs.FS // Set by main.go for production
 )
 
 func init() {
 	isDev = os.Getenv("DEV") == "1"
 }
 
+// SetDistFS sets the embedded dist filesystem for production
+func SetDistFS(fsys fs.FS) {
+	distFS = fsys
+}
+
+// IsDev returns whether the app is running in development mode
+func IsDev() bool {
+	return isDev
+}
+
 func getViteTags() (template.HTML, error) {
-	var fs = os.DirFS("frontend/dist")
+	var fsys fs.FS
 	if isDev {
-		fs = os.DirFS("frontend")
+		fsys = os.DirFS("frontend")
+	} else {
+		fsys = distFS
 	}
 
 	fragment, err := vite.HTMLFragment(vite.Config{
-		FS:        fs,
+		FS:        fsys,
 		IsDev:     isDev,
 		ViteURL:   "http://localhost:5173",
 		ViteEntry: viteEntry,

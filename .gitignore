@@ -1,7 +1,8 @@
 # Build output
 tmp/
 pb_data/
-frontend/dist/
+frontend/dist/*
+!frontend/dist/.gitkeep
 
 # Generated files
 *_templ.go
