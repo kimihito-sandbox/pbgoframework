@@ -1,0 +1,28 @@
+package templates
+
+templ Layout(title string) {
+	<!DOCTYPE html>
+	<html lang="ja">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title }</title>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"/>
+		</head>
+		<body>
+			<nav class="container">
+				<ul>
+					<li><strong>PB + Templ</strong></li>
+				</ul>
+				<ul>
+					<li><a href="/">Home</a></li>
+					<li><a href="/about">About</a></li>
+					<li><a href="/_/">Admin</a></li>
+				</ul>
+			</nav>
+			<main class="container">
+				{ children... }
+			</main>
+		</body>
+	</html>
+}
